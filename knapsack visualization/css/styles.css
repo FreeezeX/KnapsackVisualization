@@ -22,18 +22,14 @@ body {
 input[type="number"] {
     background-color: var(--dark_white);
     border: 1px solid var(--light_gray);
-    height: 30px;
-    color: var(--pale_gray);
+    color: var(--black);
     padding: 0 10px;
     vertical-align: top;
 }
 
-button {
+.active_button {
+    background: var(--blue);
     color: var(--pure_white);
-    background-color: var(--blue);
-    border: none;
-    height: 32px;
-    font-family: 'Oswald', sans-serif;
 }
 
 p {
@@ -63,22 +59,13 @@ nav ul {
     padding: 0;
 }
 
-nav li {
+.top_menu li {
     list-style-position: inside;
     font: 16px 'Oswald', sans-serif;
     text-transform: uppercase;
-    padding: 10px; 
-}
-
-.top_menu li {
     display: inline-block;
     padding: 10px 30px;
     margin: 0;
-}
-
-.top_menu li.active_button {
-    background: var(--blue);
-    color: var(--pure_white);
 }
 
 #container {
@@ -106,9 +93,8 @@ nav li {
 }
 
 #control_panel input{
-    height: 22px;
-    width: 30px;
-    color: var(--black);
+    height: 20px;
+    width: 32px;
 }
 
 #weight_and_price {
@@ -141,19 +127,10 @@ nav li {
     float: right;
 }
 
-/*
-footer {
-    background: var(--dark_gray);
-    color: var(--pearl_gray);
-    font-size: 11px;
-    margin-top: 15px;
+.active_window {
+    display: "";
 }
 
-#footer {
-    max-width: 1280px;
-    margin: auto;
-    padding: 10px 0;
-    height: 33px;
-    text-align: right;  
+.inactive_window {
+    display: none;
 }
-*/
