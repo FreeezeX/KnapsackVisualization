@@ -2,13 +2,90 @@
 
 let knapsackCapacity = null;
 let itemsAmount = null;
+let startButtonIsAvailable = true;
+let answerButtonIsAvailable = false;
+let stepButtonIsAvailable = false;
+let rawPosition = 0;
+let cellPosition = 0;
 let weightsList = [];
 let pricesList = [];
-let tableOfDP = [];
+
+let guideButton = document.querySelector('#guide_button');
+let aboutAlgoButton = document.querySelector('#about_algo_button');
+let classicTaskButton = document.querySelector('#classic_task_button');
+let altTaskButton = document.querySelector('#alt_task_button');
+
+let startButton = document.querySelector("#start_button");
+let answerButton = document.querySelector("#answer_button");
+let stepButton = document.querySelector("#step_button");
+
+let algoTable = document.querySelector("#dynamic_table");
+let itemsNumberInput = document.querySelector("#items_number_input");
+let capacityInput = document.querySelector("#capacity_input");
+let stepInfo = document.querySelector("#step_info_block");
+let resultInfo = document.querySelector("#result_block");
+let weightsArray = document.querySelector("#w_array");
+let pricesArray = document.querySelector("#p_array");
+
+// ******************* top_menu buttons actions *********************
+
+guideButton.addEventListener('click', function() {
+    if (this.className == "button") {
+        this.className = "active_button";
+        document.querySelector("#control_panel").className = "inactive_window";
+        document.querySelector("#content").className = "inactive_window";
+        document.querySelector("#instruction").className = "active_window";
+        document.querySelector("#about_algorithm").className = "inactive_window";
+        document.querySelector("#about_algo_button").className = "button";
+        document.querySelector("#classic_task_button").className = "button";
+        document.querySelector("#alt_task_button").className = "button";
+    }
+});
+
+aboutAlgoButton.addEventListener('click', function() {
+    if (this.className == "button") {
+        this.className = "active_button";
+        document.querySelector("#control_panel").className = "inactive_window";
+        document.querySelector("#content").className = "inactive_window";
+        document.querySelector("#instruction").className = "inactive_window";
+        document.querySelector("#about_algorithm").className = "active_window";
+        document.querySelector("#guide_button").className = "button";
+        document.querySelector("#classic_task_button").className = "button";
+        document.querySelector("#alt_task_button").className = "button";
+    }
+});
+
+classicTaskButton.addEventListener('click', function() {
+    if (this.className == "button") {
+        this.className = "active_button";
+        document.querySelector("#control_panel").className = "active_window";
+        document.querySelector("#content").className = "active_window";
+        document.querySelector("#instruction").className = "inactive_window";
+        document.querySelector("#about_algorithm").className = "inactive_window";
+        document.querySelector("#guide_button").className = "button";
+        document.querySelector("#about_algo_button").className = "button";
+        document.querySelector("#alt_task_button").className = "button";
+    }
+});
+
+altTaskButton.addEventListener('click', function() {
+    alert("Данная функция в текущий момент находится в разработке");
+    /*
+    if (this.className == "button") {
+        this.className = "active_button";
+        document.querySelector("#control_panel").className = "active_window";
+        document.querySelector("#content").className = "active_window";
+        document.querySelector("#instruction").className = "inactive_window";
+        document.querySelector("#about_algorithm").className = "inactive_window";
+        document.querySelector("#guide_button").className = "button";
+        document.querySelector("#about_algo_button").className = "button";
+        document.querySelector("#classic_task_button").className = "button";
+    }
+    */
+});
 
 //********************** control_menu_actions ***********************
 
-let itemsNumberInput = document.querySelector("#items_number_input");
 itemsNumberInput.addEventListener('blur', function() {
     let newVal = Math.trunc(itemsNumberInput.value);
     if (newVal != itemsNumberInput.value) {
@@ -25,7 +102,6 @@ itemsNumberInput.addEventListener('blur', function() {
     }
 });
 
-let capacityInput = document.querySelector("#capacity_input");
 capacityInput.addEventListener('blur', function() {
     let newVal = Math.trunc(capacityInput.value);
     if (newVal != capacityInput.value) {
@@ -40,83 +116,124 @@ capacityInput.addEventListener('blur', function() {
     }
 });
 
+startButton.addEventListener('click', function() {
+    if (startButtonIsAvailable) {
+        rawPosition = 0;
+        cellPosition = 0;
+        //очищаем все поля в content
+        algoTable.innerHTML = "";
+        stepInfo.innerHTML = "";
+        resultInfo.innerHTML = "";
+        //забираем данные из input`ов в массивы
+        let inputsW = document.getElementById("w_array").getElementsByTagName("input");
+        for (let i = 0; i < inputsW.length; i++) {
+            weightsList.push(inputsW[i].value);
+        }
+        let inputsP = document.getElementById("p_array").getElementsByTagName("input");
+        for (let i = 0; i < inputsP.length; i++) {
+            pricesList.push(inputsP[i].value);
+        }
+        //проверяем введеные числа
+        let passedCheck = true;
+        for (let weight of weightsList) {
+            if (weight < 1) {
+                passedCheck = false;
+                alert("Вес предмета должен быть больше нуля! Исправьте введенные данные");
+                break;
+            }
+        }
+        for (let price of pricesList) {
+            if (price < 0) {
+                passedCheck = false;
+                alert("Цена предмета не должна быть отрицательной! Исправьте введенные данные");
+                break;
+            }
+        }
+        if (passedCheck) {
+            //создаем таблицу нужных размеров, заполняем пустотой
+            createTable();
+            //обновляем значения доступности кнопок
+            answerButtonIsAvailable = true;
+            stepButtonIsAvailable = true;
+            startButtonIsAvailable = false;
+        }  else {
+            weightsList = [];
+            pricesList = [];
+        }
+    } else {
+        alert('Алгоритм уже запущен, чтобы завершить сразу, нажмите "получить ответ"');
+    }
+});
+
+answerButton.addEventListener('click', function() {
+    if (answerButtonIsAvailable) {
+        //если не пришли к концу, выполняем функцию makeStep, пока не дойдем до ответа
+        //когда дойдем, запускаем алгоритм восстановления ответа
+        //заполняем поле ответа в content
+        answerButtonIsAvailable = false;
+        stepButtonIsAvailable = false;
+        startButtonIsAvailable = true;
+    } else {
+        alert('Сначала запустите алгоритм с помощью кнопки "старт"');
+    }
+});
+
+stepButton.addEventListener('click', function() {
+    if (stepButtonIsAvailable) {
+        //если не пришли к концу, делаем шаг функцией makeStep
+        if (rawPosition != itemsAmount + 1 || cellPosition != knapsackCapacity + 1) {
+            makeStep();
+        } else {
+
+        }
+        //если дошли до конца, печатаем ответ в поле
+    } else {
+        alert('Сначала запустите алгоритv с помощью кнопки "старт"');
+    }
+});
+
 function createWeightInputs() {
-    let weightsArray = document.querySelector("#w_array");
     weightsArray.innerHTML = "";
     for (let i = 0; i < itemsAmount; i++) {
         let tmp = document.createElement("input");
         tmp.setAttribute("type", "number");
+        tmp.setAttribute("value", 1);
         weightsArray.appendChild(tmp);
     }
 }
 
 function createPricesInputs() {
-    let pricesArray = document.querySelector("#p_array");
     pricesArray.innerHTML = "";
     for (let i = 0; i < itemsAmount; i++) {
         let tmp = document.createElement("input");
         tmp.setAttribute("type", "number");
+        tmp.setAttribute("value", 1);
         pricesArray.appendChild(tmp);
     }
 }
 
-// ******************* top_menu buttons actions *********************
-
-let guideButton = document.querySelector('#guide_button');
-guideButton.addEventListener('click', function() {
-    if (this.className == "button") {
-        this.className = "active_button";
-        document.querySelector("#control_panel").className = "inactive_window";
-        document.querySelector("#content").className = "inactive_window";
-        document.querySelector("#instruction").className = "active_window";
-        document.querySelector("#about_algorithm").className = "inactive_window";
-        document.querySelector("#about_algo_button").className = "button";
-        document.querySelector("#classic_task_button").className = "button";
-        document.querySelector("#alt_task_button").className = "button";
+function createTable() {
+    let tbl = document.createElement("table");
+    for (let i = 0; i < itemsAmount + 2; i++) {
+        let tr = tbl.insertRow();
+        for (let j = 0; j < knapsackCapacity + 2; j++) {
+            let td = tr.insertCell();
+            if (i == 0 && j == 0) {
+                td.appendChild(document.createTextNode(""));
+            } else if (j == 0) {
+                td.appendChild(document.createTextNode(`k = ${i - 1}`));
+            } else if (i == 0) {
+                td.appendChild(document.createTextNode(j - 1));
+            } else if (i == 1 && j != 0 || j == 1 && i != 0) {
+                td.appendChild(document.createTextNode(0));
+            }
+        }
     }
-});
+    algoTable.appendChild(tbl);
+    rawPosition = 2;
+    cellPosition = 2;
+}
 
-let aboutAlgoButton = document.querySelector('#about_algo_button');
-aboutAlgoButton.addEventListener('click', function() {
-    if (this.className == "button") {
-        this.className = "active_button";
-        document.querySelector("#control_panel").className = "inactive_window";
-        document.querySelector("#content").className = "inactive_window";
-        document.querySelector("#instruction").className = "inactive_window";
-        document.querySelector("#about_algorithm").className = "active_window";
-        document.querySelector("#guide_button").className = "button";
-        document.querySelector("#classic_task_button").className = "button";
-        document.querySelector("#alt_task_button").className = "button";
-    }
-});
+function makeStep() {
 
-let classicTaskButton = document.querySelector('#classic_task_button');
-classicTaskButton.addEventListener('click', function() {
-    if (this.className == "button") {
-        this.className = "active_button";
-        document.querySelector("#control_panel").className = "active_window";
-        document.querySelector("#content").className = "active_window";
-        document.querySelector("#instruction").className = "inactive_window";
-        document.querySelector("#about_algorithm").className = "inactive_window";
-        document.querySelector("#guide_button").className = "button";
-        document.querySelector("#about_algo_button").className = "button";
-        document.querySelector("#alt_task_button").className = "button";
-    }
-});
-
-let altTaskButton = document.querySelector('#alt_task_button');
-altTaskButton.addEventListener('click', function() {
-    alert("Данная функция в текущий момент находится в разработке");
-    /*
-    if (this.className == "button") {
-        this.className = "active_button";
-        document.querySelector("#control_panel").className = "active_window";
-        document.querySelector("#content").className = "active_window";
-        document.querySelector("#instruction").className = "inactive_window";
-        document.querySelector("#about_algorithm").className = "inactive_window";
-        document.querySelector("#guide_button").className = "button";
-        document.querySelector("#about_algo_button").className = "button";
-        document.querySelector("#classic_task_button").className = "button";
-    }
-    */
-});
+}

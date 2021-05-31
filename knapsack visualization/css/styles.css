@@ -134,3 +134,24 @@ nav ul {
 .inactive_window {
     display: none;
 }
+
+table {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+    font-size: 14px;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+td:first-child {
+    background: var(--blue);
+    color: white;
+    padding: 5px 15px;
+}
+
+td {
+    border-style: solid;
+    border-width: 0 1px 1px 0;
+    border-color: white;
+    background: var(--pearl_gray);
+    padding: 5px 15px;
+}
