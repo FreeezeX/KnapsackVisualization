@@ -9,6 +9,7 @@ let rawPosition = 0;
 let cellPosition = 0;
 let weightsList = [];
 let pricesList = [];
+let answerItems = [];
 
 let guideButton = document.querySelector('#guide_button');
 let aboutAlgoButton = document.querySelector('#about_algo_button');
@@ -167,9 +168,16 @@ startButton.addEventListener('click', function() {
 
 answerButton.addEventListener('click', function() {
     if (answerButtonIsAvailable) {
-        //если не пришли к концу, выполняем функцию makeStep, пока не дойдем до ответа
-        //когда дойдем, запускаем алгоритм восстановления ответа
-        //заполняем поле ответа в content
+        while (rawPosition <= itemsAmount + 1) {
+            make_step();
+            cellPosition++;
+            if (cellPosition > knapsackCapacity + 1) {
+                cellPosition = 2;
+                rawPosition++;
+            }
+        }
+        find_result(itemsAmount + 1, knapsackCapacity + 1);
+        //создать текст в контент
         answerButtonIsAvailable = false;
         stepButtonIsAvailable = false;
         startButtonIsAvailable = true;
@@ -180,15 +188,23 @@ answerButton.addEventListener('click', function() {
 
 stepButton.addEventListener('click', function() {
     if (stepButtonIsAvailable) {
-        //если не пришли к концу, делаем шаг функцией makeStep
-        if (rawPosition != itemsAmount + 1 || cellPosition != knapsackCapacity + 1) {
-            makeStep();
+        if (rawPosition > itemsAmount + 1) {
+            find_result(itemsAmount + 1, knapsackCapacity + 1);
+            //создать текст в контент
+            alert(answerItems);
+            stepButtonIsAvailable = false;
+            answerButtonIsAvailable = false;
+            startButtonIsAvailable = true;
         } else {
-
+            make_step();
+            cellPosition++;
+            if (cellPosition > knapsackCapacity + 1) {
+                cellPosition = 2;
+                rawPosition++;
+            }
         }
-        //если дошли до конца, печатаем ответ в поле
     } else {
-        alert('Сначала запустите алгоритv с помощью кнопки "старт"');
+        alert('Сначала запустите алгорим с помощью кнопки "старт"');
     }
 });
 
@@ -234,6 +250,36 @@ function createTable() {
     cellPosition = 2;
 }
 
-function makeStep() {
+function make_step() {
+    let row = algoTable.firstChild.firstChild.rows;
+    // find a
+    let col = row[rawPosition - 1].cells;
+    let a = col[cellPosition].innerHTML;
+    // find b
+    let b = 0;
+    if (cellPosition >= weightsList[rawPosition - 2]) {
+        b = Number(col[cellPosition - weightsList[rawPosition - 2]].innerHTML) + Number(pricesList[rawPosition - 2]);
+    }
+    col = row[rawPosition].cells;
+    col[cellPosition].innerHTML = Math.max(a, b);
+    // надо добавить вывод сообщения в поле и подсветку a и b
+}
 
+function find_result(k, s) {
+    alert("in rec " + k + " " + s);
+    let row = algoTable.firstChild.firstChild.rows;
+    // find a and b
+    let col = row[k].cells; 
+    let a = Number(col[s].innerHTML);
+    if (a == 0) {
+        return;
+    }
+    col = row[k - 1].cells;
+    let b = Number(col[s].innerHTML);
+    if (a == b) {
+        find_result(k - 1, s);
+    } else {
+        find_result(k - 1, s - Number(weightsList[k - 2]));
+        answerItems.push(k - 1);
+    }
 }
