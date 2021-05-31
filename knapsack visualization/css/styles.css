@@ -155,3 +155,28 @@ td {
     background: var(--pearl_gray);
     padding: 5px 15px;
 }
+
+.taken_item {
+    background: #FF9A40;
+    color: black;
+}
+
+.went_item {
+    background: var(--pale_gray);
+    color: white;
+}
+
+.current_cell {
+    background: var(--dark_gray);
+    color: white;
+}
+
+.previous_good_cell {
+    background: #37DA7E;
+    color: black;
+}
+
+.previous_bad_cell {
+    background: #FF6840;
+    color: black;
+}

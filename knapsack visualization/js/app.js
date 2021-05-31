@@ -177,7 +177,7 @@ answerButton.addEventListener('click', function() {
             }
         }
         find_result(itemsAmount + 1, knapsackCapacity + 1);
-        //создать текст в контент
+        print_result();
         answerButtonIsAvailable = false;
         stepButtonIsAvailable = false;
         startButtonIsAvailable = true;
@@ -190,7 +190,7 @@ stepButton.addEventListener('click', function() {
     if (stepButtonIsAvailable) {
         if (rawPosition > itemsAmount + 1) {
             find_result(itemsAmount + 1, knapsackCapacity + 1);
-            //создать текст в контент
+            print_result();
             alert(answerItems);
             stepButtonIsAvailable = false;
             answerButtonIsAvailable = false;
@@ -257,7 +257,7 @@ function make_step() {
     let a = col[cellPosition].innerHTML;
     // find b
     let b = 0;
-    if (cellPosition >= weightsList[rawPosition - 2]) {
+    if (cellPosition > weightsList[rawPosition - 2]) {
         b = Number(col[cellPosition - weightsList[rawPosition - 2]].innerHTML) + Number(pricesList[rawPosition - 2]);
     }
     col = row[rawPosition].cells;
@@ -266,7 +266,6 @@ function make_step() {
 }
 
 function find_result(k, s) {
-    alert("in rec " + k + " " + s);
     let row = algoTable.firstChild.firstChild.rows;
     // find a and b
     let col = row[k].cells; 
@@ -274,12 +273,29 @@ function find_result(k, s) {
     if (a == 0) {
         return;
     }
+    col[s].className = "went_item";
     col = row[k - 1].cells;
     let b = Number(col[s].innerHTML);
     if (a == b) {
         find_result(k - 1, s);
     } else {
+        col = row[k].cells;
+        col[s].className = "taken_item";
         find_result(k - 1, s - Number(weightsList[k - 2]));
         answerItems.push(k - 1);
     }
+}
+
+function print_result() {
+    let p = document.createElement('p');
+    p.className = "answer_message";
+    let row = algoTable.firstChild.firstChild.rows;
+    let col = row[itemsAmount + 1].cells; 
+    let a = Number(col[knapsackCapacity + 1].innerHTML);
+    p.innerHTML = `Максимально возмжожная стоимоть: ${a}`;
+    resultInfo.append(p);
+    p = document.createElement('p');
+    p.className = "answer_message";
+    p.innerHTML = `Для этого нужно взять предметы напротив оранжевых ячеек`;
+    resultInfo.append(p);
 }
