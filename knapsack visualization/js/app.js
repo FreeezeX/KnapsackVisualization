@@ -5,7 +5,7 @@ let itemsAmount = null;
 let startButtonIsAvailable = true;
 let answerButtonIsAvailable = false;
 let stepButtonIsAvailable = false;
-let rawPosition = 0;
+let rowPosition = 0;
 let cellPosition = 0;
 let weightsList = [];
 let pricesList = [];
@@ -119,7 +119,7 @@ capacityInput.addEventListener('blur', function() {
 
 startButton.addEventListener('click', function() {
     if (startButtonIsAvailable) {
-        rawPosition = 0;
+        rowPosition = 0;
         cellPosition = 0;
         //очищаем все поля в content
         algoTable.innerHTML = "";
@@ -168,12 +168,19 @@ startButton.addEventListener('click', function() {
 
 answerButton.addEventListener('click', function() {
     if (answerButtonIsAvailable) {
-        while (rawPosition <= itemsAmount + 1) {
+        while (rowPosition <= itemsAmount + 1) {
             make_step();
             cellPosition++;
             if (cellPosition > knapsackCapacity + 1) {
                 cellPosition = 2;
-                rawPosition++;
+                rowPosition++;
+            }
+        }
+        let row = algoTable.firstChild.firstChild.rows;
+        for (let i = 1; i < itemsAmount + 2; i++) {
+            let col = row[i].cells;
+            for (let j = 1; j < knapsackCapacity + 2; j++) {
+                col[j].className = "";
             }
         }
         find_result(itemsAmount + 1, knapsackCapacity + 1);
@@ -188,10 +195,16 @@ answerButton.addEventListener('click', function() {
 
 stepButton.addEventListener('click', function() {
     if (stepButtonIsAvailable) {
-        if (rawPosition > itemsAmount + 1) {
+        let row = algoTable.firstChild.firstChild.rows;
+        for (let i = 1; i < itemsAmount + 2; i++) {
+            let col = row[i].cells;
+            for (let j = 1; j < knapsackCapacity + 2; j++) {
+                col[j].className = "";
+            }
+        }
+        if (rowPosition > itemsAmount + 1) {
             find_result(itemsAmount + 1, knapsackCapacity + 1);
             print_result();
-            alert(answerItems);
             stepButtonIsAvailable = false;
             answerButtonIsAvailable = false;
             startButtonIsAvailable = true;
@@ -200,7 +213,7 @@ stepButton.addEventListener('click', function() {
             cellPosition++;
             if (cellPosition > knapsackCapacity + 1) {
                 cellPosition = 2;
-                rawPosition++;
+                rowPosition++;
             }
         }
     } else {
@@ -246,22 +259,39 @@ function createTable() {
         }
     }
     algoTable.appendChild(tbl);
-    rawPosition = 2;
+    rowPosition = 2;
     cellPosition = 2;
 }
 
 function make_step() {
+    let validB = false;
     let row = algoTable.firstChild.firstChild.rows;
     // find a
-    let col = row[rawPosition - 1].cells;
+    let col = row[rowPosition - 1].cells;
     let a = col[cellPosition].innerHTML;
     // find b
     let b = 0;
-    if (cellPosition > weightsList[rawPosition - 2]) {
-        b = Number(col[cellPosition - weightsList[rawPosition - 2]].innerHTML) + Number(pricesList[rawPosition - 2]);
+    if (cellPosition > weightsList[rowPosition - 2]) {
+        validB = true;
+        b = Number(col[cellPosition - weightsList[rowPosition - 2]].innerHTML) + Number(pricesList[rowPosition - 2]);
     }
-    col = row[rawPosition].cells;
+    col = row[rowPosition].cells;
     col[cellPosition].innerHTML = Math.max(a, b);
+    col[cellPosition].className = "current_cell";
+    if (validB) {
+        if (a >= b) {
+            col = row[rowPosition - 1].cells;
+            col[cellPosition].className = "previous_good_cell";
+            col[cellPosition - weightsList[rowPosition - 2]].className = "previous_bad_cell";
+        } else {
+            col = row[rowPosition - 1].cells;
+            col[cellPosition].className = "previous_bad_cell";
+            col[cellPosition - weightsList[rowPosition - 2]].className = "previous_good_cell";
+        }
+    } else {
+        col = row[rowPosition - 1].cells;
+        col[cellPosition].className = "previous_good_cell";
+    }
     // надо добавить вывод сообщения в поле и подсветку a и b
 }
 
